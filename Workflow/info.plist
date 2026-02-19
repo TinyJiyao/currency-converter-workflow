@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>bundleid</key>
-	<string>com.alfredapp.vitor.currencyconverter</string>
+	<string>me.jiyao.currencyconverter</string>
 	<key>connections</key>
 	<dict>
 		<key>19CCA131-17BE-40E9-B2D9-C6FF97E8D958</key>
@@ -57,7 +57,7 @@
 		</array>
 	</dict>
 	<key>createdby</key>
-	<string>Vítor Galvão</string>
+	<string>Your Name (fork of Vítor Galvão)</string>
 	<key>description</key>
 	<string>Convert between different currencies</string>
 	<key>disabled</key>
@@ -349,7 +349,7 @@ Rates provided by [Exchange Rate API](https://www.exchangerate-api.com).</string
 		</dict>
 	</array>
 	<key>version</key>
-	<string>25.3</string>
+	<string>26.2.1</string>
 	<key>webaddress</key>
 	<string>https://github.com/alfredapp/currency-converter-workflow/</string>
 </dict>
