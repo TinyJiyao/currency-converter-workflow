@@ -213,26 +213,16 @@
 
 Convert currencies via the `cur` keyword. Type a number to see all available currencies with their full name and code.
 
-![Typing a number](images/about/number.png)
-
-Type a currency code or name to filter.
-
-![Filtering for starting currency](images/about/eur.png)
-
 Pressing &lt;kbd&gt;↩&lt;/kbd&gt; on a partial match triggers the autocomplete. See all conversion targets when matching a unit exactly.
 
-![Showing all possible conversions](images/about/eurto.png)
+Type further to filter for target units. Connector words ("to", "as", "in") are optional to help with readability.
 
-Type further to filter for target units. Connector words (“to”, “as”, “in”) are optional to help with readability.
-
-![Filtering for ending currency](images/about/eurtodollar.png)
+Currency symbols are supported: $42, ¥100, €50, £30 etc.
 
 * &lt;kbd&gt;↩&lt;/kbd&gt; Copy result to clipboard.
 * &lt;kbd&gt;⌘&lt;/kbd&gt;&lt;kbd&gt;↩&lt;/kbd&gt; Paste result to frontmost app.
 
-Configure the [Hotkey](https://www.alfredapp.com/help/workflows/triggers/hotkey/) or use the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/) as shortcuts to convert results from Alfred’s [Calculator](https://www.alfredapp.com/help/features/calculator/), [Clipboard History](https://www.alfredapp.com/help/features/clipboard/), or selected text.
-
-![Universal Action](images/about/ua.png)
+Configure the [Hotkey](https://www.alfredapp.com/help/workflows/triggers/hotkey/) or use the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/) as shortcuts to convert results from Alfred's [Calculator](https://www.alfredapp.com/help/features/calculator/), [Clipboard History](https://www.alfredapp.com/help/features/clipboard/), or selected text.
 
 Rates provided by [Exchange Rate API](https://www.exchangerate-api.com).</string>
 	<key>uidata</key>
@@ -315,9 +305,51 @@ Rates provided by [Exchange Rate API](https://www.exchangerate-api.com).</string
 			<key>variable</key>
 			<string>thousands_group</string>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>USD</string>
+				<key>placeholder</key>
+				<string>e.g. CNY</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>Currency code used as the base for fetching exchange rates (e.g. USD, EUR, CNY). Changing this clears the local cache.</string>
+			<key>label</key>
+			<string>Base Currency</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>base_currency</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>e.g. USD,EUR,JPY,GBP</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>Comma-separated list of currency codes to show by default when no target is typed (e.g. USD,EUR,JPY,GBP). Leave empty to show all currencies.</string>
+			<key>label</key>
+			<string>Default Target Currencies</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>default_targets</string>
+		</dict>
 	</array>
 	<key>version</key>
-	<string>25.2</string>
+	<string>25.3</string>
 	<key>webaddress</key>
 	<string>https://github.com/alfredapp/currency-converter-workflow/</string>
 </dict>
