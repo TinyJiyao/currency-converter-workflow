@@ -30,3 +30,6 @@ Configure the [Hotkey](https://www.alfredapp.com/help/workflows/triggers/hotkey/
 ![Universal Action](Workflow/images/about/ua.png)
 
 Rates provided by [Exchange Rate API](https://www.exchangerate-api.com).
+
+===
+Double-click the generated CurrencyConverter.alfredworkflow to install.
