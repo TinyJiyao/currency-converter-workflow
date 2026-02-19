@@ -8,11 +8,78 @@ function envVar(varName) {
     .objectForKey(varName).js
 }
 
+function envVarOrDefault(varName, defaultValue) {
+  const val = $.NSProcessInfo
+    .processInfo
+    .environment
+    .objectForKey(varName).js
+  return (val && val.trim().length > 0) ? val.trim() : defaultValue
+}
+
 function findMissing(arrayA, arrayB) {
   return [...new Set(arrayA.filter(itemA => !arrayB.includes(itemA)))]
 }
 
+// 货币符号 → 货币代码映射
+// 注意：部分符号（如 $）对应多种货币，这里映射到最常用的一种
+const SYMBOL_MAP = {
+  "$":  "USD",
+  "us$": "USD",
+  "u$": "USD",
+  "€":  "EUR",
+  "£":  "GBP",
+  "¥":  "CNY",   // 默认映射人民币；日元请用 円、jp¥ 或 jpy
+  "cn¥": "CNY",
+  "¥cn": "CNY",
+  "rmb": "CNY",
+  "元":  "CNY",
+  "jp¥": "JPY",
+  "¥jp": "JPY",
+  "円":  "JPY",
+  "₩":  "KRW",
+  "₹":  "INR",
+  "₽":  "RUB",
+  "₺":  "TRY",
+  "₴":  "UAH",
+  "₦":  "NGN",
+  "₱":  "PHP",
+  "฿":  "THB",
+  "₫":  "VND",
+  "₭":  "LAK",
+  "₮":  "MNT",
+  "₲":  "PYG",
+  "₡":  "CRC",
+  "₵":  "GHS",
+  "₸":  "KZT",
+  "₼":  "AZN",
+  "₾":  "GEL",
+  "﷼":  "SAR",
+  "kr":  "SEK",   // 北欧克朗通用缩写，优先瑞典克朗
+  "a$":  "AUD",
+  "au$": "AUD",
+  "c$":  "CAD",
+  "ca$": "CAD",
+  "nz$": "NZD",
+  "hk$": "HKD",
+  "s$":  "SGD",
+  "sg$": "SGD",
+  "r$":  "BRL",
+  "r":   "ZAR",   // 南非兰特
+  "chf": "CHF",
+  "fr":  "CHF"
+}
+
+function resolveSymbol(input) {
+  return SYMBOL_MAP[input.toLowerCase()] || null
+}
+
 function matchCurrencies(searchWord, currencies) {
+  // 先尝试符号匹配
+  const symbolMatch = resolveSymbol(searchWord)
+  if (symbolMatch && currencies[symbolMatch]) {
+    return { [symbolMatch]: currencies[symbolMatch] }
+  }
+
   const matchingCurrencies = Object.keys(currencies).map(currencyCode => {
     if (currencyCode.toLowerCase().startsWith(searchWord)) return [currencyCode, currencies[currencyCode]]
 
@@ -23,7 +90,8 @@ function matchCurrencies(searchWord, currencies) {
   return Object.fromEntries(matchingCurrencies.filter(currency => currency))
 }
 
-function fetchRates(ratesURL, ratesFile) {
+function fetchRates(baseCurrency, ratesFile) {
+  const ratesURL = `https://open.er-api.com/v6/latest/${baseCurrency}`
   const fileManager = $.NSFileManager.defaultManager
 
   // If cache is recent, return early
@@ -98,7 +166,7 @@ function fetchRates(ratesURL, ratesFile) {
     EUR: "Euro",
     FJD: "Fiji Dollar",
     FKP: "Falkland Islands Pound",
-    FOK: "Faroese Króna",
+    FOK: "Faroese Króna",
     GBP: "United Kingdom Pound",
     GEL: "Georgian Lari",
     GGP: "Guernsey Pound",
@@ -119,7 +187,7 @@ function fetchRates(ratesURL, ratesFile) {
     INR: "Indian Rupee",
     IQD: "Iraqi Dinar",
     IRR: "Iranian Rial",
-    ISK: "Icelandic Króna",
+    ISK: "Icelandic Króna",
     JEP: "Jersey Pound",
     JMD: "Jamaican Dollar",
     JOD: "Jordanian Dinar",
@@ -144,7 +212,7 @@ function fetchRates(ratesURL, ratesFile) {
     MGA: "Malagasy Ariary",
     MKD: "Macedonian Denar",
     MMK: "Burmese Kyat",
-    MNT: "Mongolian Tögrög",
+    MNT: "Mongolian Tögrög",
     MOP: "Macanese Pataca",
     MRU: "Mauritanian Ouguiya",
     MUR: "Mauritian Rupee",
@@ -155,7 +223,7 @@ function fetchRates(ratesURL, ratesFile) {
     MZN: "Mozambican Metical",
     NAD: "Namibian Dollar",
     NGN: "Nigerian Naira",
-    NIO: "Nicaraguan Córdoba",
+    NIO: "Nicaraguan Córdoba",
     NOK: "Norwegian Krone",
     NPR: "Nepalese Rupee",
     NZD: "New Zealand Dollar",
@@ -166,7 +234,7 @@ function fetchRates(ratesURL, ratesFile) {
     PHP: "Philippine Peso",
     PKR: "Pakistani Rupee",
     PLN: "Polish Złoty",
-    PYG: "Paraguayan Guaraní",
+    PYG: "Paraguayan Guaraní",
     QAR: "Qatari Riyal",
     RON: "Romanian Leu",
     RSD: "Serbian Dinar",
@@ -184,7 +252,7 @@ function fetchRates(ratesURL, ratesFile) {
     SOS: "Somali Shilling",
     SRD: "Surinamese Dollar",
     SSP: "South Sudanese Pound",
-    STN: "São Tomé and Príncipe Dobra",
+    STN: "São Tomé and Príncipe Dobra",
     SYP: "Syrian Pound",
     SZL: "Eswatini Lilangeni",
     THB: "Thai Baht",
@@ -202,10 +270,10 @@ function fetchRates(ratesURL, ratesFile) {
     USD: "United States Dollar",
     UYU: "Uruguayan Peso",
     UZS: "Uzbekistani So'm",
-    VES: "Venezuelan Bolívar Soberano",
-    VND: "Vietnamese Đồng",
+    VES: "Venezuelan Bolívar Soberano",
+    VND: "Vietnamese Đồng",
     VUV: "Vanuatu Vatu",
-    WST: "Samoan Tālā",
+    WST: "Samoan Tālā",
     XAF: "Central African Franc",
     XCD: "East Caribbean Dollar",
     XCG: "Caribbean Guilder",
@@ -254,9 +322,13 @@ function fetchRates(ratesURL, ratesFile) {
 
 // Main
 function run(argv) {
-  const ratesFile = `${envVar("alfred_workflow_cache")}/ratesUSD.json`
-  const ratesURL = "https://open.er-api.com/v6/latest/USD"
-  const currencies = fetchRates(ratesURL, ratesFile)
+  // 需求1：从用户配置读取默认基准货币和默认目标货币
+  const baseCurrency = envVarOrDefault("base_currency", "USD").toUpperCase()
+  const defaultTargets = envVarOrDefault("default_targets", "").toUpperCase()
+    .split(",").map(s => s.trim()).filter(s => s.length > 0)
+
+  const ratesFile = `${envVar("alfred_workflow_cache")}/rates${baseCurrency}.json`
+  const currencies = fetchRates(baseCurrency, ratesFile)
 
   const formatter = $.NSNumberFormatter.alloc.init
   formatter.numberStyle = $.NSNumberFormatterDecimalStyle
@@ -264,30 +336,66 @@ function run(argv) {
   formatter.maximumFractionDigits = 2
   formatter.hasThousandSeparators = envVar("thousands_group") === "1"
 
-  const interpretedInput = argv[0].replace(/ (to|in|as) /i, " ").toLowerCase()
+  // 需求2：允许货币符号出现在数字前面（如 $42、¥100）
+  // 先尝试提取开头的货币符号
+  const rawInput = argv[0]
+
+  // 匹配开头符号（非数字、非字母、非空格的字符，或已知多字符符号前缀）
+  // 策略：先检查开头是否有符号映射，再按原逻辑处理
+  let prefixSymbol = ""
+  let strippedInput = rawInput
+
+  // 尝试从输入开头提取符号（贪心：先试2字符，再试1字符）
+  const inputForSymbol = rawInput.trimStart()
+  for (const sym of Object.keys(SYMBOL_MAP).sort((a,b) => b.length - a.length)) {
+    if (inputForSymbol.toLowerCase().startsWith(sym)) {
+      // 确认符号后紧跟数字或空格+数字
+      const after = inputForSymbol.slice(sym.length).trimStart()
+      if (/^\d/.test(after)) {
+        prefixSymbol = sym
+        strippedInput = after
+        break
+      }
+    }
+  }
+
+  const interpretedInput = strippedInput.replace(/ (to|in|as) /i, " ").toLowerCase()
   const rawNumber = interpretedInput.replace(/^(\d*(\.\d+)?)\D*/, "$1")
   const rawOperation = interpretedInput.substring(rawNumber.length).trim()
-	const splitOperation = rawOperation.split(" ")
+  const splitOperation = rawOperation.split(" ")
   const numberValue = parseFloat(rawNumber)
-  const originCurrency = splitOperation[0] || ""
-  const targetCurrency = splitOperation[1] || ""
+
+  // 如果开头有符号，则 originCurrency 直接由符号决定（忽略后面可能残留的货币词）
+  const originCurrency = prefixSymbol
+    ? prefixSymbol.toLowerCase()
+    : (splitOperation[0] || "")
+  const targetCurrency = prefixSymbol
+    ? (splitOperation[0] || "")
+    : (splitOperation[1] || "")
 
   // Abort if invalid number
   if (Number.isNaN(numberValue)) return JSON.stringify({ items: [{
     title: "Input a Value and a Currency",
-    subtitle: "Example: 42 EUR",
+    subtitle: "Example: 42 EUR  or  $42  or  ¥100",
     valid: false
   }]})
 
-  // When no starting currencies specified, show them all
-  if (originCurrency.length === 0) return JSON.stringify({ items: Object.keys(currencies).map(currencyCode => ({
-    uid: currencyCode,
-    title: `${numberValue} ${currencyCode}`,
-    subtitle: `${currencies[currencyCode].country} ${currencies[currencyCode].coin}`,
-    autocomplete: `${numberValue} ${currencyCode} to `,
-    valid: false,
-    icon: { path: `images/flags/${currencyCode}.png` }
-  }))})
+  // When no starting currencies specified, show all (prioritise default targets if set)
+  if (originCurrency.length === 0) {
+    const allCodes = Object.keys(currencies)
+    const orderedCodes = defaultTargets.length > 0
+      ? [...defaultTargets.filter(c => currencies[c]), ...allCodes.filter(c => !defaultTargets.includes(c))]
+      : allCodes
+
+    return JSON.stringify({ items: orderedCodes.map(currencyCode => ({
+      uid: currencyCode,
+      title: `${numberValue} ${currencyCode}`,
+      subtitle: `${currencies[currencyCode].country} ${currencies[currencyCode].coin}`,
+      autocomplete: `${numberValue} ${currencyCode} to `,
+      valid: false,
+      icon: { path: `images/flags/${currencyCode}.png` }
+    }))})
+  }
 
   // Get matches when starting currency specified
   const startCurrencies = matchCurrencies(originCurrency, currencies)
@@ -297,7 +405,7 @@ function run(argv) {
   // When no starting currencies match, ask for corrections
   if (startMatchCount === 0) return JSON.stringify({ items: [{
     title: "Input a Valid Currency",
-    subtitle: "Examples: EUR, GBP, USD",
+    subtitle: "Examples: EUR, GBP, USD, $, ¥, €",
     valid: false
   }]})
 
@@ -313,7 +421,11 @@ function run(argv) {
 
   // When only one currency matches, convert
   const startCurrencyCode = startCurrenciesCodes[0]
-  const endCurrencies = matchCurrencies(targetCurrency, currencies)
+
+  // 需求1：若没有指定目标货币，且设置了默认目标，则只展示默认目标
+  const endCurrencies = targetCurrency.length === 0 && defaultTargets.length > 0
+    ? Object.fromEntries(defaultTargets.filter(c => currencies[c]).map(c => [c, currencies[c]]))
+    : matchCurrencies(targetCurrency, currencies)
 
   return JSON.stringify({ items: Object.keys(endCurrencies).flatMap(currencyCode => {
     if (currencyCode === startCurrencyCode) return []
